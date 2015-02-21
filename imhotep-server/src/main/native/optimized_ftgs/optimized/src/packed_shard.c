@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>							/* !@# debug */
+#include <string.h>
 #include "imhotep_native.h"
 #include "circ_buf.h"
 
@@ -254,6 +255,7 @@ void packed_shard_init(	packed_shard_t *shard,
 	shard->grp_metrics_len = n_docs * desc->n_vectors_per_doc;
 	shard->groups_and_metrics = (__v16qi *) aligned_alloc(	64,
 	                                                      	sizeof(__m128i ) * shard->grp_metrics_len);
+	memset(shard->groups_and_metrics, 0, sizeof(__m128i ) * shard->grp_metrics_len);
 }
 
 
