@@ -35,7 +35,7 @@ void rand_min_maxes(unsigned int *seed, size_t iterations, size_t n_metrics,
 		}
 	}
 	free(metrics);
-} 
+}
 
 #define RESET_SEED			42
 #define N_METRICS				16
@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
 		for (int doc_id = 0; doc_id < n_docs; ++doc_id) {
 			int doc_ids[1] = { doc_id };
 			rand_metrics(&seed, N_METRICS, metrics);
-			packed_shard_update_metric(&shard, doc_ids, 1, metrics, metric_index);
+			packed_shard_update_metric(&shard, doc_ids, 1, &metrics[metric_index], metric_index);
 			fprintf(stderr, "doc_id: %d metric_index: %d\n", doc_id, metric_index);
 			dump_shard(&shard);
 		}
@@ -112,14 +112,12 @@ int main(int argc, char * argv[])
 		for (int doc_id = 0; doc_id < n_docs; ++doc_id) {
 			int doc_ids[1] = { doc_id };
 			rand_metrics(&seed, N_METRICS, expected);
-			packed_shard_lookup_metric_values(&shard, doc_ids, 1, actual, metric_index);
-			for (int i_metric = 0; i_metric < N_METRICS; ++i_metric) {
-				if (expected[i_metric] != actual[i_metric]) {
-					fprintf(stderr,
-									"error: metric mismatch doc_id: %d i_metric: %d"
-									" expected: %ld actual %ld\n",
-									doc_id, i_metric, expected[i_metric], actual[i_metric]);
-				}
+			packed_shard_lookup_metric_values(&shard, doc_ids, 1, &actual[metric_index], metric_index);
+			if (expected[metric_index] != actual[metric_index]) {
+				fprintf(stderr,
+								"error: metric mismatch doc_id: %d i_metric: %d"
+								" expected: %llx actual %llx\n",
+								doc_id, metric_index, expected[metric_index]-mins[metric_index], actual[metric_index]-mins[metric_index]);
 			}
 		}
 	}
