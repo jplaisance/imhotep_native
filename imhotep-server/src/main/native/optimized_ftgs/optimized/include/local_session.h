@@ -1,8 +1,9 @@
+
 int run_tgs_pass(struct worker_desc *worker,
                  struct session_desc *session,
                  uint8_t term_type,
-                 union term_union* term,
-                 union term_union* previous_term,
+                 int int_term,
+                 char *string_term,
                  long *addresses,
                  int *docs_per_shard,
                  int *shard_handles,
@@ -19,6 +20,7 @@ int create_shard_multicache(struct session_desc *session,
 void session_init(struct session_desc *session,
                   int n_groups,
                   int n_stats,
+                  uint8_t* stat_order,
                   int n_shards);
 
 void session_destroy(struct session_desc *session);
@@ -27,7 +29,7 @@ void worker_init(struct worker_desc *worker,
                  int id,
                  int num_groups,
                  int n_metrics,
-                 uint32_t *socket_fds,
+                 int *socket_fds,
                  int num_sockets);
 void worker_destroy(struct worker_desc *worker);
 
