@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (III)J
  */
 JNIEXPORT jlong JNICALL Java_com_indeed_imhotep_local_NativeFTGSWorker_native_1session_1create
-  (JNIEnv *, jclass, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jbyteArray, jint);
 
 /*
  * Class:     com_indeed_imhotep_local_NativeFTGSWorker

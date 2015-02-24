@@ -22,7 +22,7 @@ public class NativeFTGSWorker {
     
 //    public void runTGSIteration(int term, long[] 
 
-    private static native long native_session_create(int numGroups, int numMetrics, int numShards);
+    private static native long native_session_create(int numGroups, int numMetrics, byte[] statOrder, int numShards);
 
     private static native long native_init(int id,
                                            int numGroups,
