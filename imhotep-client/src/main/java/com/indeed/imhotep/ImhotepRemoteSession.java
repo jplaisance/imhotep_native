@@ -654,6 +654,16 @@ public class ImhotepRemoteSession extends AbstractImhotepSession {
     }
 
     @Override
+    public long getLowerBound(int stat) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getUpperBound(int stat) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void createDynamicMetric(String name) throws ImhotepOutOfMemoryException {
         final ImhotepRequest request = getBuilderForType(ImhotepRequest.RequestType.CREATE_DYNAMIC_METRIC)
                 .setSessionId(sessionId)
