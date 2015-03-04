@@ -192,7 +192,7 @@ template <size_t n_metrics>
 struct Shard
 {
   const Table<n_metrics>&  _table;
-  packed_shard_t          *_shard;
+  packed_table_t          *_shard;
 
   Shard(const Table<n_metrics>& table)
     : _table(table)
@@ -200,25 +200,25 @@ struct Shard
 
     DocIds          doc_ids(table.doc_ids());
     vector<GroupId> flat_group_ids(table.flat_group_ids());
-    packed_shard_update_groups(_shard, doc_ids.data(), doc_ids.size(), flat_group_ids.data());
+    packed_shard_batch_set_group(_shard, doc_ids.data(), doc_ids.size(), flat_group_ids.data());
 
     for (size_t metric_index(0); metric_index < n_metrics; ++metric_index) {
       vector<Metric> metrics(table.metrics(metric_index));
-      packed_shard_update_metric(_shard, doc_ids.data(), doc_ids.size(),
+      packed_shard_batch_set_col(_shard, doc_ids.data(), doc_ids.size(),
                                  metrics.data(), metric_index);
     }
   }
 
-  ~Shard() { packed_shard_destroy(_shard); }
+  ~Shard() { packed_table_destroy(_shard); }
 
-  packed_shard_t * operator()() { return _shard; };
+  packed_table_t * operator()() { return _shard; };
 
   GroupStats<n_metrics> sum(const __m128i* group_stats_buf) const {
     GroupStats<n_metrics> results;
     GroupIds              gids(_table.group_ids());
     size_t                row_index(0);
     for (GroupIds::const_iterator it(gids.begin()); it != gids.end(); ++it, ++row_index) {
-      const size_t              offset(_shard->metrics_layout->unpacked_offset[row_index]);
+      const size_t              offset(_shard->unpacked_offset[row_index]);
       const Metrics<n_metrics>& row(*reinterpret_cast<const Metrics<n_metrics>*>(&group_stats_buf[offset]));
       results.insert(make_pair(*it, row));
     }
@@ -289,7 +289,7 @@ public:
   const Table<n_metrics>& table() const { return _table; }
   const Shard&            shard() const { return _shard; }
 
-  const __m128i* group_stats_buf() const { return _worker.group_stats_buf; }
+  const unpacked_table_t* group_stats_buf() const { return _worker.grp_stats; }
 };
 
 template <size_t n_metrics>
