@@ -77,7 +77,6 @@ public class NativeFTGSWorker {
     private static native long native_session_create(long nativeWorkerStructPtr,
                                                      int numGroups,
                                                      int numMetrics,
-                                                     byte[] statOrder,
                                                      int numShards);
 
     private static native long native_init(int id,
