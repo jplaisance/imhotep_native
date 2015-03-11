@@ -304,6 +304,10 @@ int packed_table_get_cols(packed_table_t *table)
     return table->n_cols;
 }
 
+__v16qi * packed_table_get_row_addr(packed_table_t *table, int row)
+{
+    return &table->data[row * table->row_size];
+}
 
 /*
  * Shared cell accessors and setters
@@ -441,7 +445,7 @@ void packed_table_set_cell(packed_table_t *table, int row, int col, long value)
     internal_set_cell(table, row, col, value, packed_vector_index);
 }
 
-long packed_table_get_group(packed_table_t *table, int row)
+int packed_table_get_group(packed_table_t *table, int row)
 {
     int row_size = table->row_size;
 

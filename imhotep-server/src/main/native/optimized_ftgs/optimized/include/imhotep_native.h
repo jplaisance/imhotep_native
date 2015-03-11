@@ -4,13 +4,17 @@
 #include <smmintrin.h>
 #include <tmmintrin.h>
 #include <pmmintrin.h>
+#include <malloc.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "bit_tree.h"
 
-#define TERM_TYPE_STRING						0
-#define TERM_TYPE_INT                           1
+#define TERM_TYPE_STRING 0
+#define TERM_TYPE_INT    1
 
-#define PREFETCH_DISTANCE                       8
+#define PREFETCH_DISTANCE 8
+
+#define SIZE_OF_ERRSTR 256
 
 #define ALIGNED_ALLOC(alignment, size) ((alignment) < (size)) ? aligned_alloc(alignment,size) : aligned_alloc(alignment,alignment);
 
@@ -23,8 +27,13 @@ struct unpacked_table_desc;
 typedef struct unpacked_table_desc unpacked_table_t;
 
 struct bit_fields_and_group {
-	uint32_t grp :28;
-	uint32_t metrics :4;
+    uint32_t grp :28;
+    uint32_t metrics :4;
+};
+
+struct runtime_err {
+    int  code;
+    char str[SIZE_OF_ERRSTR];
 };
 
 struct buffered_socket {
@@ -32,6 +41,7 @@ struct buffered_socket {
     uint8_t* buffer;
     size_t buffer_ptr;
     size_t buffer_len;
+    struct runtime_err* err;   // NULL unless a syscall error occurred
 };
 
 struct worker_desc {
@@ -112,6 +122,7 @@ int slice_copy_range(uint8_t* slice,
 
 void socket_init(struct buffered_socket *socket, uint32_t fd);
 void socket_destroy(struct buffered_socket *socket);
+void socket_capture_error(struct buffered_socket *socket, int code);
 
 void lookup_and_accumulate_grp_stats(
                                    packed_table_t *src_table,
@@ -130,10 +141,11 @@ int packed_table_get_size(packed_table_t *table);
 int packed_table_get_row_size(packed_table_t *table);
 int packed_table_get_rows(packed_table_t *table);
 int packed_table_get_cols(packed_table_t *table);
+__v16qi * packed_table_get_row_addr(packed_table_t *table, int row);
 
 long packed_table_get_cell(packed_table_t *table, int row, int column);
 void packed_table_set_cell(packed_table_t *table, int row, int col, long value);
-long packed_table_get_group(packed_table_t *table, int row);
+int packed_table_get_group(packed_table_t *table, int row);
 void packed_table_set_group(packed_table_t *table, int row, int value);
 void packed_table_set_all_groups(packed_table_t *table, int value);
 
@@ -193,3 +205,9 @@ void unpacked_table_add_rows(unpacked_table_t* src_table,
                                     int dest_row_id,
                                     int prefetch_row_id);
 
+int remap_docs_in_target_groups(packed_table_t* doc_id_group,
+                                int*            results,
+                                uint8_t*        doc_id_stream,
+                                size_t          n_doc_ids,
+                                int*            remappings,
+                                long            placeholder_group);
